@@ -1,29 +1,16 @@
 {
-  "name": "whatsapp-automation-backend",
+  "name": "whatsapp-bot-web",
   "version": "1.0.0",
-  "description": "Production-grade WhatsApp automation backend",
+  "description": "WhatsApp bot with web interface",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "pm2:start": "pm2 start ecosystem.config.js",
-    "pm2:stop": "pm2 stop whatsapp-automation",
-    "pm2:restart": "pm2 restart whatsapp-automation",
-    "pm2:logs": "pm2 logs whatsapp-automation",
-    "pm2:monit": "pm2 monit"
+    "start": "node server.js"
   },
   "dependencies": {
-    "@whiskeysockets/baileys": "^6.7.2",
+    "@whiskeysockets/baileys": "^6.6.0",
     "express": "^4.18.2",
-    "multer": "^1.4.5-lts.1",
+    "socket.io": "^4.7.2",
     "pino": "^8.17.2",
-    "qrcode-terminal": "^0.12.0",
-    "fs-extra": "^11.1.1",
-    "axios": "^1.6.2"
-  },
-  "devDependencies": {
-    "pm2": "^5.3.0"
-  },
-  "engines": {
-    "node": ">=18.0.0"
+    "chalk": "^4.1.2"
   }
 }
