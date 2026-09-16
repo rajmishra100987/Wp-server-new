@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WhatsApp Bot Controller</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: #0b0b0f;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: #1a1a22;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+        }
+        h1 {
+            text-align: center;
+            color: #00e676;
+            text-shadow: 0 0 10px #00e67655;
+            border-bottom: 2px solid #2a2a35;
+            padding-bottom: 15px;
+        }
+        h2 {
+            color: #82b1ff;
+            margin-top: 25px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 6px;
+            color: #b0b0c0;
+        }
+        input, select, textarea, button {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #333;
+            border-radius: 8px;
+            background: #23232e;
+            color: #eee;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: #00e676;
+            outline: none;
+            box-shadow: 0 0 8px #00e67655;
+        }
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        .row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .row .form-group {
+            flex: 1;
+            min-width: 180px;
+        }
+        .btn {
+            background: #00e676;
+            color: #111;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: 0.25s;
+        }
+        .btn:hover {
+            background: #69f0ae;
+            transform: scale(1.02);
+        }
+        .btn-secondary {
+            background: #2979ff;
+        }
+        .btn-secondary:hover {
+            background: #448aff;
+        }
+        .btn-danger {
+            background: #d32f2f;
+        }
+        .btn-danger:hover {
+            background: #f44336;
+        }
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        .btn-group .btn {
+            flex: 1;
+            min-width: 100px;
+        }
+        #groupListContainer {
+            background: #12121a;
+            padding: 12px;
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 10px;
+            border: 1px solid #2a2a35;
+        }
+        .group-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: 0.15s;
+            border-bottom: 1px solid #25252f;
+        }
+        .group-item:hover {
+            background: #2a2a3a;
+        }
+        .group-item.selected {
+            background: #1b5e20;
+            border-left: 4px solid #00e676;
+        }
+        .log-container {
+            background: #0d0d13;
+            border-radius: 8px;
+            padding: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            border: 1px solid #2a2a35;
+            margin-top: 10px;
+        }
+        .log-entry {
+            padding: 2px 0;
+            border-bottom: 1px solid #1a1a22;
+        }
+        .log-success { color: #69f0ae; }
+        .log-error { color: #ff5252; }
+        .log-warn { color: #ffd740; }
+        .log-info { color: #82b1ff; }
+        .badge {
+            background: #00e67622;
+            color: #00e676;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            display: inline-block;
+            margin-left: 10px;
+        }
+        #pairingCodeDisplay {
+            background: #1b5e20;
+            color: #fff;
+            font-size: 24px;
+            text-align: center;
+            padding: 16px;
+            border-radius: 12px;
+            margin: 15px 0;
+            letter-spacing: 4px;
+            font-weight: bold;
+            display: none;
+        }
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+        }
+        @media (max-width: 600px) {
+            .container { padding: 16px; }
+            .row { flex-direction: column; gap: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 WhatsApp Bot Controller</h1>
+        <p style="text-align:center; color:#aaa;">Non‑stop 24/7 multi‑target message sender</p>
+
+        <!-- Pairing Code Display -->
+        <div id="pairingCodeDisplay">📱 PAIRING CODE: <span id="pairingCode"></span></div>
+
+        <!-- Configuration Form -->
+        <div class="form-group">
+            <label>📞 Your WhatsApp Number (with country code, e.g. 91XXXXXXXXXX)</label>
+            <input type="text" id="phoneNumber" placeholder="911234567890" />
+        </div>
+
+        <div class="row">
+            <div class="form-group">
+                <label>🎯 Target Type</label>
+                <select id="targetType">
+                    <option value="number">Phone Number (Inbox)</option>
+                    <option value="group">WhatsApp Group</option>
+                </select>
+            </div>
+            <div class="form-group" id="targetNumberGroup">
+                <label>📱 Target Phone Number (if type = Number)</label>
+                <input type="text" id="targetNumber" placeholder="911234567890" />
+            </div>
+        </div>
+
+        <!-- Group selector (hidden initially) -->
+        <div id="groupSelector" style="display:none;">
+            <div class="form-group">
+                <label>👥 Select Group</label>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn btn-secondary" id="fetchGroupsBtn" style="flex:1;">🔄 Fetch My Groups</button>
+                </div>
+                <div id="groupListContainer"></div>
+                <input type="hidden" id="selectedGroupJid" />
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>📝 Message Prefix (e.g. [BOT])</label>
+            <input type="text" id="msgPrefix" value="[BOT]" placeholder="[BOT]" />
+        </div>
+
+        <div class="form-group">
+            <label>📄 Message Lines (one per line)</label>
+            <textarea id="messageLines" placeholder="Hello!&#10;How are you?&#10;This is an automated message."></textarea>
+            <div style="margin-top:6px; font-size:13px; color:#888;">
+                <span>Or upload a .txt file:</span>
+                <input type="file" id="fileUpload" accept=".txt" style="display:inline-block; width:auto; padding:6px; background:transparent; border:none;" />
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>⏱️ Delay between messages (seconds)</label>
+            <input type="number" id="delaySec" value="5" min="1" />
+        </div>
+
+        <div class="btn-group">
+            <button class="btn" id="startBtn">▶️ START BOT</button>
+            <button class="btn btn-danger" id="stopBtn" style="display:none;">⏹️ STOP</button>
+        </div>
+
+        <!-- Logs -->
+        <h2>📜 Live Logs</h2>
+        <div class="log-container" id="logContainer">
+            <div class="log-entry log-info">[i] Waiting for actions...</div>
+        </div>
+
+        <div class="footer">🚀 Deployable on Render • All features preserved</div>
+    </div>
+
+    <!-- Socket.io -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+        // DOM refs
+        const phoneInput = document.getElementById('phoneNumber');
+        const targetType = document.getElementById('targetType');
+        const targetNumberInput = document.getElementById('targetNumber');
+        const groupSelector = document.getElementById('groupSelector');
+        const groupListContainer = document.getElementById('groupListContainer');
+        const selectedGroupJid = document.getElementById('selectedGroupJid');
+        const fetchGroupsBtn = document.getElementById('fetchGroupsBtn');
+        const msgPrefix = document.getElementById('msgPrefix');
+        const messageLines = document.getElementById('messageLines');
+        const fileUpload = document.getElementById('fileUpload');
+        const delaySec = document.getElementById('delaySec');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const logContainer = document.getElementById('logContainer');
+        const pairingCodeDisplay = document.getElementById('pairingCodeDisplay');
+        const pairingCodeSpan = document.getElementById('pairingCode');
+
+        let groupsFetched = false;
+
+        // Toggle group selector
+        targetType.addEventListener('change', function() {
+            if (this.value === 'group') {
+                groupSelector.style.display = 'block';
+                targetNumberInput.parentElement.style.display = 'none';
+            } else {
+                groupSelector.style.display = 'none';
+                targetNumberInput.parentElement.style.display = 'block';
+            }
+        });
+        // Initial state
+        targetType.dispatchEvent(new Event('change'));
+
+        // File upload handler
+        fileUpload.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                messageLines.value = ev.target.result;
+            };
+            reader.readAsText(file);
+        });
+
+        // Fetch groups
+        fetchGroupsBtn.addEventListener('click', function() {
+            socket.emit('getGroups');
+            addLog('Fetching groups...', 'info');
+        });
+
+        socket.on('groupList', (groups) => {
+            groupListContainer.innerHTML = '';
+            if (groups.length === 0) {
+                groupListContainer.innerHTML = '<div style="padding:10px; color:#888;">No groups found.</div>';
+                return;
+            }
+            groups.forEach(g => {
+                const div = document.createElement('div');
+                div.className = 'group-item';
+                div.textContent = `${g.subject} (${g.id})`;
+                div.dataset.jid = g.id;
+                div.addEventListener('click', function() {
+                    document.querySelectorAll('.group-item').forEach(el => el.classList.remove('selected'));
+                    this.classList.add('selected');
+                    selectedGroupJid.value = this.dataset.jid;
+                    addLog(`Selected group: ${g.subject} (${g.id})`, 'info');
+                });
+                groupListContainer.appendChild(div);
+            });
+            groupsFetched = true;
+        });
+
+        // Pairing code
+        socket.on('pairingCode', (code) => {
+            pairingCodeSpan.textContent = code;
+            pairingCodeDisplay.style.display = 'block';
+            addLog(`Pairing code received: ${code}`, 'success');
+        });
+
+        // Logs from server
+        socket.on('log', (data) => {
+            addLog(data.message, data.type);
+        });
+
+        function addLog(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `log-entry log-${type}`;
+            div.textContent = message;
+            logContainer.appendChild(div);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        // Start bot
+        startBtn.addEventListener('click', function() {
+            const phone = phoneInput.value.trim();
+            const targetTypeVal = targetType.value;
+            let targetJid = '';
+            if (targetTypeVal === 'number') {
+                const num = targetNumberInput.value.trim().replace(/[^0-9]/g, '');
+                if (!num) { addLog('Please enter a valid target number.', 'error'); return; }
+                targetJid = `${num}@s.whatsapp.net`;
+            } else {
+                targetJid = selectedGroupJid.value.trim();
+                if (!targetJid) { addLog('Please select a group from the list.', 'error'); return; }
+            }
+
+            const prefix = msgPrefix.value.trim() || '';
+            const lines = messageLines.value.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+            if (lines.length === 0) { addLog('Please provide at least one message line.', 'error'); return; }
+            const delay = parseInt(delaySec.value) || 5;
+
+            if (!phone) { addLog('Please enter your phone number.', 'error'); return; }
+
+            // Disable start button, show stop
+            startBtn.disabled = true;
+            startBtn.textContent = '⏳ Starting...';
+            stopBtn.style.display = 'inline-block';
+
+            // Send data to server
+            socket.emit('startBot', {
+                phoneNumber: phone,
+                targetType: targetTypeVal,
+                targetJid: targetJid,
+                messages: lines,
+                prefix: prefix,
+                delay: delay
+            });
+        });
+
+        // Stop bot
+        stopBtn.addEventListener('click', function() {
+            socket.emit('stopBot');
+            addLog('Stop command sent.', 'warn');
+            startBtn.disabled = false;
+            startBtn.textContent = '▶️ START BOT';
+            stopBtn.style.display = 'none';
+        });
+
+        // Re-enable start button when bot stops (optional from server logs)
+        socket.on('log', (data) => {
+            if (data.message.includes('Bot stopped') || data.message.includes('Session expired')) {
+                startBtn.disabled = false;
+                startBtn.textContent = '▶️ START BOT';
+                stopBtn.style.display = 'none';
+            }
+        });
+
+        // Init logs
+        addLog('✅ Web interface ready. Configure and start the bot.', 'success');
+    </script>
+</body>
+</html>
